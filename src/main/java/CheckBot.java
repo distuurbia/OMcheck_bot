@@ -1,10 +1,11 @@
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -14,6 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CheckBot extends TelegramLongPollingBot {
+    private ResponseService responseService;
+
+
+    public CheckBot() {
+        responseService = new ResponseServiceImplementation();
+    }
     public static void main(String[] args) {
         ApiContextInitializer.init();
         TelegramBotsApi botApi = new TelegramBotsApi();
@@ -24,35 +31,51 @@ public class CheckBot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendMsg(Message message, String text){
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.enableMarkdown(true);
-        sendMessage.setChatId(message.getChatId().toString());
-        sendMessage.setReplyToMessageId(message.getMessageId());
-        sendMessage.setText(text);
-        try{
-            setButtons(sendMessage);
-            execute(sendMessage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-    }
 
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
-        if(message != null && message.hasText()){
-            switch(message.getText()){
-                case "/help":
-                    sendMsg(message, "Чем могу помочь?");
-                    break;
-                case "/setting":
-                    sendMsg(message, "Что будем настраивать?");
-                    break;
-                default:
 
+        long chatId = getChatId(update);
+
+
+        Response response = responseService.getResponse(update);
+
+
+        for (BotApiMethod method : extractMessages(response, chatId)) {
+            try {
+                execute(method);
+
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
             }
         }
+    }
+
+    private long getChatId(Update update) {
+        if (update.hasMessage()) {
+            return update.getMessage().getChatId();
+        } else {
+            return update.getCallbackQuery().getMessage().getChatId();
+        }
+    }
+
+    private List<BotApiMethod> extractMessages(Response response, long chatId) {
+        List<BotApiMethod> methods = new ArrayList<>();
+        if (response.getEditMessageId() == -1) {
+            SendMessage sendMessage = new SendMessage()
+                    .setChatId(chatId)
+                    .setText(response.getMessage());
+
+            methods.add(sendMessage);
+        }
+        if (response.getEditMessageId() != -1) {
+            methods.add(new EditMessageText()
+                    .setChatId(chatId)
+                    .setMessageId(response.getEditMessageId())
+                    .setText(response.getMessage()));
+        }
+        return methods;
     }
 
     public void setButtons(SendMessage sendMessage){
