@@ -8,7 +8,7 @@ public class OtherCommand extends Command {
     public Response execute() {
 
         response = new Response();
-        response.setMessage("Such command doesn't exist, please, try again.");
+        response.setMessage("smth");
         return response;
     }
 }

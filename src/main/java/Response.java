@@ -1,23 +1,20 @@
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 public class Response {
     private String message = null;
-    private ReplyKeyboard markup;
-    private int editMessageId;
 
+    private int editMessageId;
+    private Coordinates coordinates;
     public Response() {
-        markup = new InlineKeyboardMarkup();
+
         editMessageId = -1;
     }
 
     public boolean hasMessage() {
         return message != null;
-    }
-
-    public boolean hasKeyboardMarkup() {
-        return markup != null;
     }
 
     public int getEditMessageId(){
@@ -28,8 +25,13 @@ public class Response {
         return message;
     }
 
+    public float getLatitude(){return coordinates.getLatitude();}
+    public float getLongitude(){return coordinates.getLongitude();};
+
     public void setMessage(String message){
         this.message = message;
     }
+
+    public void setLocation(Coordinates coordinates){this.coordinates = coordinates;}
 
 }

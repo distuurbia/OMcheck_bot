@@ -11,6 +11,7 @@ public abstract class Command {
     public Command(String s, User user) {
         this.s = s;
         this.user = user;
+
     }
 
     public CommandEnum getCommandName() {
@@ -23,18 +24,5 @@ public abstract class Command {
 
     public abstract Response execute();
 
-//    public void sendMsg(Message message, String text){
-//        SendMessage sendMessage = new SendMessage();
-//        sendMessage.enableMarkdown(true);
-//        sendMessage.setChatId(message.getChatId().toString());
-//        sendMessage.setReplyToMessageId(message.getMessageId());
-//        sendMessage.setText(text);
-//        try{
-//            execute(sendMessage);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
 
 }

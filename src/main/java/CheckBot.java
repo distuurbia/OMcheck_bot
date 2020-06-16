@@ -2,9 +2,9 @@ import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -19,7 +19,7 @@ public class CheckBot extends TelegramLongPollingBot {
 
 
     public CheckBot() {
-        responseService = new ResponseServiceImplementation();
+        responseService = new ResponseServiceImpl();
     }
     public static void main(String[] args) {
         ApiContextInitializer.init();
@@ -34,7 +34,6 @@ public class CheckBot extends TelegramLongPollingBot {
 
 
     public void onUpdateReceived(Update update) {
-        Message message = update.getMessage();
 
         long chatId = getChatId(update);
 
@@ -50,7 +49,9 @@ public class CheckBot extends TelegramLongPollingBot {
                 e.printStackTrace();
             }
         }
+
     }
+
 
     private long getChatId(Update update) {
         if (update.hasMessage()) {
@@ -67,7 +68,12 @@ public class CheckBot extends TelegramLongPollingBot {
                     .setChatId(chatId)
                     .setText(response.getMessage());
 
+            SendLocation sendLocation = new SendLocation(response.getLatitude(),
+                    response.getLongitude())
+                    .setChatId(String.valueOf(chatId));
+
             methods.add(sendMessage);
+            methods.add(sendLocation);
         }
         if (response.getEditMessageId() != -1) {
             methods.add(new EditMessageText()
@@ -75,25 +81,10 @@ public class CheckBot extends TelegramLongPollingBot {
                     .setMessageId(response.getEditMessageId())
                     .setText(response.getMessage()));
         }
+
         return methods;
     }
 
-    public void setButtons(SendMessage sendMessage){
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
-
-        List<KeyboardRow> keyboardRowList = new ArrayList<>();
-        KeyboardRow keyboardFirstRow = new KeyboardRow();
-
-        keyboardFirstRow.add(new KeyboardButton("/help"));
-        keyboardFirstRow.add(new KeyboardButton("/setting"));
-
-        keyboardRowList.add(keyboardFirstRow);
-        replyKeyboardMarkup.setKeyboard(keyboardRowList);
-    }
 
     public String getBotUsername() {
         return "OMcheck_bot";

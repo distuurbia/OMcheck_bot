@@ -4,21 +4,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResponseServiceImplementation implements ResponseService {
+public class ResponseServiceImpl implements ResponseService {
 
     private UserDao userDao = ArrayListUserDao.getInstance();
     private Map<CommandEnum, CommandCreator> commandCreator = getCommands();
+    private Coordinates coordinates = new Coordinates();
 
     public Response getResponse(Update update) {
         String request = "undefined";
 
         long chatId = 0L;
+
         if (update.hasMessage()) {
             request = update.getMessage().getText();
             chatId = update.getMessage().getChatId();
-        } else if (update.hasCallbackQuery()) {
-            request = update.getCallbackQuery().getData();
-            chatId = update.getCallbackQuery().getMessage().getChatId();
+            coordinates.setCoordinates(update.getMessage().getLocation().getLatitude(),
+                    update.getMessage().getLocation().getLongitude());
         }
 
         validatePresentUser(chatId);
@@ -42,7 +43,7 @@ public class ResponseServiceImplementation implements ResponseService {
 
     private void validatePresentUser(long chatId) {
         if (!userDao.containsChatId(chatId)) {
-            userDao.addUser(new User(chatId));
+            userDao.addUser(new User(chatId, coordinates));
         }
     }
 
@@ -59,7 +60,7 @@ public class ResponseServiceImplementation implements ResponseService {
 
         commands.put(CommandEnum.MENU, MenuCommand::new);
         commands.put(CommandEnum.OTHER, OtherCommand::new);
-//        commands.put(CommandEnum.ADDFAVORITES, AddFavouritesCommand::new);
+
 
         return commands;
     }

@@ -1,7 +1,9 @@
+import org.telegram.telegrambots.meta.api.objects.Message;
+
 public enum CommandEnum {
     MENU("/menu", "menu_item"),
     OTHER("undefined", "undefined_item"),
-    ADDFAVORITES("/addfavorites", "add_favorites_item");
+    GET_LOCATION("/get_location", "get_location");
 
 
     private String command;
