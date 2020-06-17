@@ -13,6 +13,10 @@ public class User {
         this.coordinates = coordinates;
     }
 
+    public Update getCurrentUpdate() {
+        return currentUpdate;
+    }
+
     public long getChatId(){
         return chatId;
     }

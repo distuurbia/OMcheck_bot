@@ -14,6 +14,7 @@ public abstract class Command {
 
     }
 
+
     public CommandEnum getCommandName() {
         return commandName;
     }

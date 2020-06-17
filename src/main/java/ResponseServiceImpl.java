@@ -18,9 +18,10 @@ public class ResponseServiceImpl implements ResponseService {
         if (update.hasMessage()) {
             request = update.getMessage().getText();
             chatId = update.getMessage().getChatId();
-            coordinates.setCoordinates(update.getMessage().getLocation().getLatitude(),
-                    update.getMessage().getLocation().getLongitude());
+            System.out.println("Request " + request);
         }
+
+        //update.getMessage().getLocation()
 
         validatePresentUser(chatId);
 
@@ -60,6 +61,7 @@ public class ResponseServiceImpl implements ResponseService {
 
         commands.put(CommandEnum.MENU, MenuCommand::new);
         commands.put(CommandEnum.OTHER, OtherCommand::new);
+        commands.put(CommandEnum.LOCATION, LocationCommand::new);
 
 
         return commands;

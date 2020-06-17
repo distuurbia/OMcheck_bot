@@ -4,13 +4,8 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +16,7 @@ public class CheckBot extends TelegramLongPollingBot {
     public CheckBot() {
         responseService = new ResponseServiceImpl();
     }
+
     public static void main(String[] args) {
         ApiContextInitializer.init();
         TelegramBotsApi botApi = new TelegramBotsApi();
@@ -30,7 +26,6 @@ public class CheckBot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
-
 
 
     public void onUpdateReceived(Update update) {
@@ -63,24 +58,26 @@ public class CheckBot extends TelegramLongPollingBot {
 
     private List<BotApiMethod> extractMessages(Response response, long chatId) {
         List<BotApiMethod> methods = new ArrayList<>();
-        if (response.getEditMessageId() == -1) {
-            SendMessage sendMessage = new SendMessage()
-                    .setChatId(chatId)
-                    .setText(response.getMessage());
 
-            SendLocation sendLocation = new SendLocation(response.getLatitude(),
-                    response.getLongitude())
-                    .setChatId(String.valueOf(chatId));
+        if (response.getMessage() != null && !response.getMessage().isEmpty() || response.getButton() != null) {
+            SendMessage sendMessage = new SendMessage().setChatId(chatId);
+
+            if (response.getMessage() != null && !response.getMessage().isEmpty()) {
+                sendMessage.setText(response.getMessage());
+            }
+            if (response.getButton() != null) {
+                sendMessage.setText("Your geolocation:");
+                sendMessage.setReplyMarkup(response.getButton());
+            }
 
             methods.add(sendMessage);
-            methods.add(sendLocation);
         }
-        if (response.getEditMessageId() != -1) {
-            methods.add(new EditMessageText()
-                    .setChatId(chatId)
-                    .setMessageId(response.getEditMessageId())
-                    .setText(response.getMessage()));
+
+        if(response.getCoordinates() != null) {
+            SendLocation sendLocation = new SendLocation().setChatId(chatId);
+            sendLocation.setLatitude(response.getCoordinates().getLatitude()).setLongitude(response.getCoordinates().getLongitude());
         }
+
 
         return methods;
     }

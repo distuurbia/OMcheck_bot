@@ -3,7 +3,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 public enum CommandEnum {
     MENU("/menu", "menu_item"),
     OTHER("undefined", "undefined_item"),
-    GET_LOCATION("/get_location", "get_location");
+    LOCATION("/location", "location");
 
 
     private String command;
